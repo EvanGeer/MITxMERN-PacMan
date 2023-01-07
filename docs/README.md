@@ -7,6 +7,10 @@ Simple project to demonstrate recursion and manipulating the DOM, while observin
 - PacMan should make a chomping animation
 
 ## Add-on scope:
+- Added Physics (vertical direction only)
+   - Gravitational acceleration
+   - Bounce losses
+   - Randomized drag coefficient for each PacMan
 - Resizing the window should scootch the PacMen back in the frame and retain the feel of their animation
 - Single button should start the animation
 - Formatting should be more visually pleasing
