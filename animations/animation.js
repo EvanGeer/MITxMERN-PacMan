@@ -14,6 +14,8 @@ const bounceEfficiency = .95;
 
 // This array holds all the pacmen
 const pacMen = [];
+
+// Main function to execute in html
 function makeOne() {
   // add a new PacMan
   pacMen.push(makePac());
