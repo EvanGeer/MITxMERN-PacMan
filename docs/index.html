@@ -27,6 +27,8 @@
 
       <h2 id="add-on-scope">Add-on scope:</h2>
       <ul>
+        <li>Added additional sprite (Kirby)</li>
+        <li>Added a fighting mechanic, evaluated on proximity and mouth-open state</li>
         <li>
           Added Physics (vertical direction only)
           <ul>
@@ -35,6 +37,9 @@
             <li>Randomized drag coefficient for each PacMan</li>
           </ul>
         </li>
+        <li>PacMan should beat Kirby if in the same area and his mouth is open</li>
+        <li>Kirby should beat PacMan if in the same area and he is kicking</li>
+        <li>Sprite should display a poof image when beaten</li>
         <li>
           Resizing the window should scootch the PacMen back in the frame and
           retain the feel of their animation
@@ -55,9 +60,16 @@
 
       <h2 id="sample-image">Sample Image</h2>
       <p>
-        <img src="pacmanSample.gif" alt="PacMac Sample Gif" />
+        <img src="sample.gif" alt="PacMac Sample Gif" />
       </p>
 
+      <h2>Future Improvements:</h2>
+      <ul>
+        <li>Currently PacMan has precedent over Kirby, since his proximity is evaluated first. This could be improved upon</li>
+        <li>Currently facing direction is not taken into consideration. Evaluation for facing direction could make the game more fare for Kirby</li>
+      </ul>
+
+      </p>
       <h2 id="usage">Usage:</h2>
       <p>Pull repo and launch index.html</p>
 
