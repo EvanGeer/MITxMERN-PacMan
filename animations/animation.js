@@ -1,6 +1,4 @@
-let pos = 0;
-let started = false;
-
+// Setup constants
 const pacManImages = {
   forwardOpen: "./images/PacMan1.png",
   forwardClosed: "./images/PacMan2.png",
@@ -8,20 +6,31 @@ const pacManImages = {
   backwardClosed: "./images/PacMan4.png",
 };
 
+// Tuning Constants
+const mouthVelocity = 3; // controls chomp speed by number of movement iterations per chomp
+const acceleration = 2;
 const startingPacManImage = pacManImages.forwardOpen;
-
-const pacMen = [];
+const bounceEfficiency = .95;
 
 // This array holds all the pacmen
-// This function returns an object with random values
-function setToRandom(scale) {
-  return { x: Math.random() * scale, y: Math.random() * scale };
+const pacMen = [];
+function makeOne() {
+  // add a new PacMan
+  pacMen.push(makePac());
+  if (!started) {
+    started = true;
+    updatePacMen();
+  }
 }
 
 // Factory to make a PacMan at a random position with random velocity
+let started = false;
 function makePac() {
   // returns an object with random values scaled {x: 33, y: 21}
   let velocity = setToRandom(10);
+
+  // gives each ball its own unique acceleration
+  let dragCoefficient = Math.random() * (acceleration / 2.0);
 
   // {x:?, y:?}
   let position = setToRandom(200);
@@ -47,22 +56,16 @@ function makePac() {
     isMovingDown: true,
     isMouthOpen: true,
     img: newimg,
+    drag: dragCoefficient,
   };
 
   return pacman;
 }
 
-function getImage(isMouthOpen, isMovingLeft) {
-  if (isMouthOpen && isMovingLeft) return pacManImages.forwardOpen;
-  if (!isMouthOpen && isMovingLeft) return pacManImages.forwardClosed;
-  if (isMouthOpen && !isMovingLeft) return pacManImages.backwardOpen;
-  if (!isMouthOpen && !isMovingLeft) return pacManImages.backwardClosed;
-  return null;
-}
 
-const mouthVelocity = 3;
+// core recursive function to animate the pacmen
 let mouthIteration = 0;
-function update() {
+function updatePacMen() {
   // loop over pacmen array and move each one and move image in DOM
   pacMen.forEach((pacman) => {
     // update position
@@ -84,23 +87,25 @@ function update() {
   }
 
   // iterate recursively
-  setTimeout(update, 20);
+  setTimeout(updatePacMen, 20);
 }
 
+// core movement logic
 function getNextPosition(pacman) {
+  
+  // get the direction multiplier
   updateDirectionByScreenExtents(pacman);
-
-  // arrange values for calc
   let xDirectionMultiplier = getXDirectionMultiplier(pacman);
   let yDirectionMultiplier = getYDirectionMultiplier(pacman);
-
+  
+  // get the velocity
+  updateVelocityByAcceleration(pacman);
   let xVelocity = pacman.velocity.x;
   let yVelocity = pacman.velocity.y;
 
+  // get the starting position
   let xStart = pacman.position.x;
   let yStart = pacman.position.y;
-
-  // log starting values
   console.log(`velocity x: ${xVelocity}, y: ${yVelocity}`);
   console.log(`position x: ${xStart}, y: ${yStart}`);
 
@@ -108,44 +113,47 @@ function getNextPosition(pacman) {
   // note: setting the min value to the window extents pushes the pacmen back in the window on resize
   let x = Math.min(xDirectionMultiplier * xVelocity + xStart, window.innerWidth - 100);
   let y = Math.min(yDirectionMultiplier * yVelocity + yStart, window.innerHeight - 100);
-  let newPos = { x, y };
 
-  // log result
+  let newPos = { x, y };
   console.log(`new pos x: ${newPos.x}, ${newPos.y}`);
+
   return newPos;
 }
 
-function getXDirectionMultiplier(pacman) {
-  return pacman.isMovingLeft ? 1 : -1;
-}
-function getYDirectionMultiplier(pacman) {
-  return pacman.isMovingDown ? 1 : -1;
+function updateVelocityByAcceleration(pacman) {
+  // when bouncing off the bottom, reduce the Y velocity by 20%
+  if (isAtBottom(pacman)) pacman.velocity.y = bounceEfficiency * pacman.velocity.y;
+
+  let dragAffectedAcceleration = acceleration - pacman.drag;
+  if (pacman.isMovingDown) pacman.velocity.y += dragAffectedAcceleration;
+  else pacman.velocity.y -= dragAffectedAcceleration;
 }
 
 function updateDirectionByScreenExtents(pacman) {
   // detect collision with all walls and make pacman bounce
   let changeNeeded = {
-    x: pacman.position.x + 100 >= window.innerWidth || pacman.position.x < 0,
-    y: pacman.position.y + 100 >= window.innerHeight || pacman.position.y < 0,
+    x: isAtRight(pacman) || isAtLeft(pacman),
+    y: isAtBottom(pacman) || isAtTop(pacman),
   };
 
   if (changeNeeded.x) pacman.isMovingLeft = !pacman.isMovingLeft;
   if (changeNeeded.y) pacman.isMovingDown = !pacman.isMovingDown;
 }
-function makeOne() {
-  // add a new PacMan
-  pacMen.push(makePac());
-  if (!started) {
-    started = true;
-    update();
-  }
+
+// helper functions
+const setToRandom = (scale) => ({ x: Math.random() * scale * 2, y: Math.random() * scale });
+function getImage(isMouthOpen, isMovingLeft) {
+  if (isMouthOpen && isMovingLeft) return pacManImages.forwardOpen;
+  if (!isMouthOpen && isMovingLeft) return pacManImages.forwardClosed;
+  if (isMouthOpen && !isMovingLeft) return pacManImages.backwardOpen;
+  if (!isMouthOpen && !isMovingLeft) return pacManImages.backwardClosed;
+  return null;
 }
 
-//don't change this line
-if (typeof module !== "undefined") {
-  module.exports = {
-    checkCollisions: updateDirectionByScreenExtents,
-    update,
-    pacMen,
-  };
-}
+// pacman interpretter functions
+const getXDirectionMultiplier = (pacman) => pacman.isMovingLeft ? 1 : -1;
+const getYDirectionMultiplier = (pacman) => pacman.isMovingDown ? 1 : -1;
+const isAtBottom = (pacman) => pacman.position.y + 100 >= window.innerHeight;
+const isAtTop = (pacman) => pacman.position.y < 0;
+const isAtLeft = (pacman) => pacman.position.x < 0;
+const isAtRight = (pacman) => pacman.position.x + 100 >= window.innerWidth
