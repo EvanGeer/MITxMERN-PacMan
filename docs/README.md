@@ -19,7 +19,7 @@ Simple project to demonstrate recursion and manipulating the DOM, while observin
 - Button should remain on top of the PacMen so that it can be clicked when they hover over
 
 ## Sample Image
-![PacMac Sample Gif](./pacmanSample.gif)
+![PacMac vs Kirby Sample Gif](./sample.gif)
 
 ## Usage:
 Pull repo and launch index.html

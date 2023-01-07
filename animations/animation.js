@@ -1,33 +1,38 @@
 // Setup constants
-const pacManImages = {
-  forwardOpen: "./images/PacMan1.png",
-  forwardClosed: "./images/PacMan2.png",
-  backwardOpen: "./images/PacMan3.png",
-  backwardClosed: "./images/PacMan4.png",
+const spriteImages = {
+  forwardOpen: "./images/sprite1.png",
+  forwardClosed: "./images/sprite2.png",
+  backwardOpen: "./images/sprite3.png",
+  backwardClosed: "./images/sprite4.png",
 };
 
 // Tuning Constants
-const mouthVelocity = 3; // controls chomp speed by number of movement iterations per chomp
+const updateSpeed_MS = 20;  // (i.e. updates per ms)
+const mouthVelocity = 3;    // controls chomp speed by number of movement iterations per chomp
 const acceleration = 2;
-const startingPacManImage = pacManImages.forwardOpen;
+const startingspriteImage = spriteImages.forwardOpen;
 const bounceEfficiency = .95;
+const jumpVelocity = 40;
 
-// This array holds all the pacmen
-const pacMen = [];
+// This array holds all the sprite
+const sprites = [];
+var pacMenBeaten = 0;
+var kirbysEaten = 0;
 
 // Main function to execute in html
-function makeOne() {
-  // add a new PacMan
-  pacMen.push(makePac());
+function makeOne(spriteName = 'pacman') {
+  // add a new sprite
+  sprites.push(makeSprite(spriteName));
+
   if (!started) {
     started = true;
-    updatePacMen();
+    updateSprites();
   }
 }
 
-// Factory to make a PacMan at a random position with random velocity
+// Factory to make a sprite at a random position with random velocity
 let started = false;
-function makePac() {
+function makeSprite(spriteName) {
   // returns an object with random values scaled {x: 33, y: 21}
   let velocity = setToRandom(10);
 
@@ -40,79 +45,100 @@ function makePac() {
   // Add image to div id = game
   var game = document.getElementById("game");
   let newimg = document.createElement("img");
-  newimg.classList.add("pacMan");
-  newimg.src = startingPacManImage;
-
+  newimg.classList.add("sprite");
+  newimg.src = startingspriteImage;
+  
   // set initial position here
   newimg.style.left = position.x;
   newimg.style.top = position.y;
-
+  
   // add new Child image to game
   game.appendChild(newimg);
-
+  
   // return details in an object
-  let pacman = {
+  let sprite = {
     position: position,
     velocity: velocity,
-    isMovingLeft: true,
+    isMovingLeft: Math.random() > 0.5,
     isMovingDown: true,
     isMouthOpen: true,
     img: newimg,
     drag: dragCoefficient,
+    name: spriteName,
+    poof: false,
   };
 
-  return pacman;
+  return sprite;
 }
 
 
-// core recursive function to animate the pacmen
+// core recursive function to animate the sprite
 let mouthIteration = 0;
-function updatePacMen() {
-  // loop over pacmen array and move each one and move image in DOM
-  pacMen.forEach((pacman) => {
+function updateSprites() {
+  
+  evaluateWinners();
+  document.getElementById('pacMenBeaten').textContent = pacMenBeaten;
+  document.getElementById('kirbysEaten').textContent = kirbysEaten;
+
+  // loop over sprite array and move each one and move image in DOM
+  sprites.filter(x => !x.poof).forEach((sprite) => {
     // update position
-    pacman.position = getNextPosition(pacman);
-    pacman.img.style.left = pacman.position.x;
-    pacman.img.style.top = pacman.position.y;
-    pacman.img.src = getImage(pacman.isMouthOpen, pacman.isMovingLeft);
+    sprite.position = getNextPosition(sprite);
+    sprite.img.style.left = sprite.position.x;
+    sprite.img.style.top = sprite.position.y;
+    sprite.img.src = getImage(sprite);
 
     // make him chomp
     if (mouthIteration >= mouthVelocity)
-      pacman.isMouthOpen = !pacman.isMouthOpen;
+      sprite.isMouthOpen = !sprite.isMouthOpen;
   });
 
   // since this is recursive, check the mouth iteration each time
   if (mouthIteration >= mouthVelocity) {
     mouthIteration = 0;
+    sprites.filter(x => x.poof).forEach((sprite) => {
+      sprite.img.remove();
+    })
   } else {
     mouthIteration++;
   }
 
   // iterate recursively
-  setTimeout(updatePacMen, 20);
+  setTimeout(updateSprites, updateSpeed_MS);
+}
+
+function jump(sprite) {
+  sprite.velocity.y = jumpVelocity;
+  sprite.isMovingDown = false;
+}
+
+function jumpAll() {
+  sprites
+    .filter(p => p.isMovingDown || isAtBottom(p))
+    .forEach(p => jump(p));
 }
 
 // core movement logic
-function getNextPosition(pacman) {
+function getNextPosition(sprite) {
   
   // get the direction multiplier
-  updateDirectionByScreenExtents(pacman);
-  let xDirectionMultiplier = getXDirectionMultiplier(pacman);
-  let yDirectionMultiplier = getYDirectionMultiplier(pacman);
+  updateDirectionByScreenExtents(sprite);
+  let xDirectionMultiplier = getXDirectionMultiplier(sprite);
+  let yDirectionMultiplier = getYDirectionMultiplier(sprite);
   
   // get the velocity
-  updateVelocityByAcceleration(pacman);
-  let xVelocity = pacman.velocity.x;
-  let yVelocity = pacman.velocity.y;
+  updateVelocityByAcceleration(sprite);
+  let xVelocity = sprite.velocity.x;
+  let yVelocity = sprite.velocity.y;
 
   // get the starting position
-  let xStart = pacman.position.x;
-  let yStart = pacman.position.y;
+  let xStart = sprite.position.x;
+  let yStart = sprite.position.y;
   console.log(`velocity x: ${xVelocity}, y: ${yVelocity}`);
   console.log(`position x: ${xStart}, y: ${yStart}`);
 
   // perform movement calc
-  // note: setting the min value to the window extents pushes the pacmen back in the window on resize
+  // note: setting the min value to the window extents pushes the sprite back in the window on resize
   let x = Math.min(xDirectionMultiplier * xVelocity + xStart, window.innerWidth - 100);
   let y = Math.min(yDirectionMultiplier * yVelocity + yStart, window.innerHeight - 100);
 
@@ -122,40 +148,92 @@ function getNextPosition(pacman) {
   return newPos;
 }
 
-function updateVelocityByAcceleration(pacman) {
+function updateVelocityByAcceleration(sprite) {
   // when bouncing off the bottom, reduce the Y velocity by 20%
-  if (isAtBottom(pacman)) pacman.velocity.y = bounceEfficiency * pacman.velocity.y;
+  if (isAtBottom(sprite)) sprite.velocity.y = bounceEfficiency * sprite.velocity.y;
 
-  let dragAffectedAcceleration = acceleration - pacman.drag;
-  if (pacman.isMovingDown) pacman.velocity.y += dragAffectedAcceleration;
-  else pacman.velocity.y -= dragAffectedAcceleration;
+  let dragAffectedAcceleration = acceleration - sprite.drag;
+  if (sprite.isMovingDown) sprite.velocity.y += dragAffectedAcceleration;
+  else sprite.velocity.y -= dragAffectedAcceleration;
 }
 
-function updateDirectionByScreenExtents(pacman) {
-  // detect collision with all walls and make pacman bounce
+function updateDirectionByScreenExtents(sprite) {
+  // detect collision with all walls and make sprite bounce
   let changeNeeded = {
-    x: isAtRight(pacman) || isAtLeft(pacman),
-    y: isAtBottom(pacman) || isAtTop(pacman),
+    x: isAtRight(sprite) || isAtLeft(sprite),
+    y: isAtBottom(sprite) || isAtTop(sprite),
   };
 
-  if (changeNeeded.x) pacman.isMovingLeft = !pacman.isMovingLeft;
-  if (changeNeeded.y) pacman.isMovingDown = !pacman.isMovingDown;
+  if (changeNeeded.x) sprite.isMovingLeft = !sprite.isMovingLeft;
+  if (changeNeeded.y) sprite.isMovingDown = !sprite.isMovingDown;
+}
+
+function evaluateWinners() {
+  // PacMan has the upper hand since he's evaluated first
+  // if a sprite isMouthOpen and near another sprite, that sprite wins
+  // ToDo: a nice future enhancement would to add an evaluation for facing direction
+
+  let pacMen = sprites.filter(x => !x.poof && x.name === 'pacman');
+  let kirbys = sprites.filter(x => !x.poof && x.name === 'kirby');
+
+  pacMen.filter(p => p.isMouthOpen).forEach(pacman => {
+    let losingKirbys = kirbys.filter(kirby => 
+      kirby.position.x <= pacman.position.x - 15 
+      && kirby.position.x >= pacman.position.x - 85
+      && kirby.position.y <= pacman.position.y - 15
+      && kirby.position.y >= pacman.position.y - 85
+      );
+
+    if (losingKirbys.length > 0)
+    {
+      losingKirbys.forEach(sprite => {
+        sprite.img.src = 'images/poof.png';
+        sprite.poof = true;
+        sprite.img.classList.remove('sprite');
+        sprite.img.classList.add('poof');
+        kirbysEaten++;
+      });
+    }
+  })
+
+  kirbys.filter(k => k.isMouthOpen).forEach(kirby => {
+    let losingPacMen = pacMen.filter(pacman => 
+      pacman.name === 'pacman'
+      && !pacman.isMouthOpen
+      && pacman.position.x <= kirby.position.x - 15 
+      && pacman.position.x >= kirby.position.x - 85
+      && pacman.position.y <= kirby.position.y - 15
+      && pacman.position.y >= kirby.position.y - 85
+      );
+
+    if (losingPacMen.length > 0)
+    {
+      losingPacMen.forEach(sprite => {
+        sprite.img.src = 'images/poof.png';
+        sprite.poof = true;
+        sprite.img.classList.remove('sprite');
+        sprite.img.classList.add('poof');
+        pacMenBeaten++;
+      });
+    }
+  })
 }
 
 // helper functions
 const setToRandom = (scale) => ({ x: Math.random() * scale * 2, y: Math.random() * scale });
-function getImage(isMouthOpen, isMovingLeft) {
-  if (isMouthOpen && isMovingLeft) return pacManImages.forwardOpen;
-  if (!isMouthOpen && isMovingLeft) return pacManImages.forwardClosed;
-  if (isMouthOpen && !isMovingLeft) return pacManImages.backwardOpen;
-  if (!isMouthOpen && !isMovingLeft) return pacManImages.backwardClosed;
+const getSelectedSprite = () => document.getElementById("sprite").value;
+
+// sprite interpretter functions
+const getXDirectionMultiplier = (sprite) => sprite.isMovingLeft ? 1 : -1;
+const getYDirectionMultiplier = (sprite) => sprite.isMovingDown ? 1 : -1;
+const isAtBottom = (sprite) => sprite.position.y + 100 >= window.innerHeight;
+const isAtTop = (sprite) => sprite.position.y < 0;
+const isAtLeft = (sprite) => sprite.position.x < 0;
+const isAtRight = (sprite) => sprite.position.x + 100 >= window.innerWidth
+function getImage(sprite) {
+  if (sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/rightOpen.png`;
+  if (!sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/rightClosed.png`;
+  if (sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/leftOpen.png`;
+  if (!sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/leftClosed.png`;
   return null;
 }
-
-// pacman interpretter functions
-const getXDirectionMultiplier = (pacman) => pacman.isMovingLeft ? 1 : -1;
-const getYDirectionMultiplier = (pacman) => pacman.isMovingDown ? 1 : -1;
-const isAtBottom = (pacman) => pacman.position.y + 100 >= window.innerHeight;
-const isAtTop = (pacman) => pacman.position.y < 0;
-const isAtLeft = (pacman) => pacman.position.x < 0;
-const isAtRight = (pacman) => pacman.position.x + 100 >= window.innerWidth

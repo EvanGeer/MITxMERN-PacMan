@@ -4,10 +4,18 @@
     <script src="animations/animation.js"></script>
   </head>
   <body>
-    <div id="game">
+    <div class="container">
+      <div class="vertical-center">
+        <label>PacMen Beaten</label>
+        <label class="score" id="pacMenBeaten">0</label>
+        <button onclick="makeOne('kirby')">Add Kirby</button>
+        |<button onclick="jumpAll()">Jump</button>
+        |<button onclick="makeOne('pacman')">Add PacMan</button>
+        <label class="score" id="kirbysEaten">0</label>
+        <label>Kirbys Eaten</label>
+      </div>
     </div>
-    <div class="vertical-center">
-      <button onclick="makeOne()">Add PacMan</button>
+    <div id="game">
     </div>
   </body>
 </html>

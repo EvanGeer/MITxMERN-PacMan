@@ -2,15 +2,37 @@ body {
     background-color: black;
 }
 
+label {
+    color: #00ffffb1;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+label.score {
+    color: whitesmoke;
+    font-size: larger;
+    font-weight: bold;
+}
+
+select {
+    background-color: #00ffff80;
+    border-color: yellow;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 8px;
+    color: white;
+    width:100px;
+    height:35px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-weight: bold;
+}
+
 button {
     background-color: #00ffff80;
     border-color: yellow;
     border-style: solid;
     border-radius: 8px;
     color: white;
-    width:350px;
-    height:30px;
-    align-self: center;
+    width:150px;
+    height:35px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     font-weight: bold;
 }
@@ -21,15 +43,23 @@ button:active {
     background-color: yellow;
 }
 
+.container {
+    width: 100%;
+}
+
 .vertical-center {
     margin: 0;
     position: absolute;
     left: 50%;
-    -ms-transform: translateX(-50%);
     transform: translateX(-50%);
   }
 
-img.pacman {
+img.sprite {
     width: 100px;
+    position: absolute;
+}
+
+img.poof {
+    width: 200px;
     position: absolute;
 }
