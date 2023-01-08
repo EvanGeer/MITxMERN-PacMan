@@ -12,26 +12,13 @@ label.score {
     font-weight: bold;
 }
 
-select {
-    background-color: #00ffff80;
-    border-color: yellow;
-    border-style: solid;
-    border-width: 2px;
-    border-radius: 8px;
-    color: white;
-    width:100px;
-    height:35px;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    font-weight: bold;
-}
-
 button {
     background-color: #00ffff80;
     border-color: yellow;
     border-style: solid;
     border-radius: 8px;
     color: white;
-    width:150px;
+    width:200px;
     height:35px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     font-weight: bold;
@@ -49,9 +36,9 @@ button:active {
 
 .vertical-center {
     margin: 0;
+    padding: 0%;
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+
   }
 
 img.sprite {
