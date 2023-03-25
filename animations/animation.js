@@ -231,9 +231,9 @@ const isAtTop = (sprite) => sprite.position.y < 0;
 const isAtLeft = (sprite) => sprite.position.x < 0;
 const isAtRight = (sprite) => sprite.position.x + 100 >= window.innerWidth
 function getImage(sprite) {
-  if (sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/rightOpen.png`;
-  if (!sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/rightClosed.png`;
-  if (sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/leftOpen.png`;
-  if (!sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/leftClosed.png`;
+  if (sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/RightOpen.png`;
+  if (!sprite.isMouthOpen && sprite.isMovingLeft) return `images/${sprite.name}/RightClosed.png`;
+  if (sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/LeftOpen.png`;
+  if (!sprite.isMouthOpen && !sprite.isMovingLeft) return `images/${sprite.name}/LeftClosed.png`;
   return null;
 }
